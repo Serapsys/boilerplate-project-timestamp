@@ -39,7 +39,7 @@ function timeConverter(UNIX_timestamp, res) {
 function isDateValid(dateStr) {
   return !isNaN(new Date(dateStr));
 }
-app.get("/api/:date", function (req, res) {
+app.get("/api/:date?", function (req, res) {
   var dateVal = isDateValid(req.params.date);
   var convertedDate = timeConverter(req.params.date, res);
   console.log("test", convertedDate);
@@ -56,17 +56,15 @@ app.get("/api/:date", function (req, res) {
       utc: new Date(req.params.date).toUTCString(),
     });
   }
-  if (!dateVal) {
-    if (secondChk) {
-      res.json({
-        unix: new Date(req.params.date).valueOf(),
-        utc: new Date(convertedDate).toUTCString(),
-      });
-    } else {
-      res.json({
-        error: "Invalid Date",
-      });
-    }
+  if (secondChk) {
+    res.json({
+      unix: parseInt(req.params.date),
+      utc: new Date(convertedDate).toUTCString(),
+    });
+  } else {
+    res.json({
+      error: "Invalid Date",
+    });
   }
 });
 
