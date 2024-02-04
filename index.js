@@ -22,33 +22,49 @@ app.get("/", function (req, res) {
 app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hellos API" });
 });
-function timeConverter(UNIX_timestamp) {
-  const dateTimeStr = new Date(1504052527183).toLocaleString();
-  const result = dateTimeStr.split(", ")[1].split(":").join("-");
-  return result;
+function timeConverter(UNIX_timestamp, res) {
+  try {
+    const dateTimeStr = new Date(parseInt(UNIX_timestamp)).toLocaleString();
+    const result = dateTimeStr.split(",")[0].split("/");
+    let day = result[1];
+    let month = result[0];
+    let year = result[2];
+    return year + "-" + month + "-" + day;
+  } catch {
+    res.json({
+      error: "Invalid Date",
+    });
+  }
 }
 function isDateValid(dateStr) {
   return !isNaN(new Date(dateStr));
 }
 app.get("/api/:date", function (req, res) {
-  let dateVal = isDateValid(req.params.date);
+  var dateVal = isDateValid(req.params.date);
+  var convertedDate = timeConverter(req.params.date, res);
+  console.log("test", convertedDate);
+  var secondChk = isDateValid(convertedDate);
+  if (req.params.date === undefined) {
+    res.json({
+      unix: new Date().valueOf(),
+      utc: new Date().toUTCString(),
+    });
+  }
   if (dateVal) {
     res.json({
       unix: new Date(req.params.date).valueOf(),
       utc: new Date(req.params.date).toUTCString(),
     });
-  } else {
-    let convertedDate = timeConverter(req.params.date);
-    console.log("hello", convertedDate);
-    let secondChk = isDateValid(convertedDate);
+  }
+  if (!dateVal) {
     if (secondChk) {
       res.json({
         unix: new Date(req.params.date).valueOf(),
-        utc: convertedDate,
+        utc: new Date(convertedDate).toUTCString(),
       });
     } else {
       res.json({
-        error: convertedDate,
+        error: "Invalid Date",
       });
     }
   }
